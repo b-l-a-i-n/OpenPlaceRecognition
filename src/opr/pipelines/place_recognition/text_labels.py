@@ -307,7 +307,8 @@ class TextLabelsPlaceRecognitionOCRPipeline(PlaceRecognitionPipeline):
 
 
     def infer(
-        self, input_data: Dict[str, Tensor], text_similarity_thresh: int = 50, print_info: bool = False
+        self, input_data: Dict[str, Tensor], text_similarity_thresh: int = 50, print_info: bool = False,
+        ocr_predictions: bool = False,
     ) -> Dict[str, np.ndarray]:
         """Single sample inference.
 
@@ -374,4 +375,4 @@ class TextLabelsPlaceRecognitionOCRPipeline(PlaceRecognitionPipeline):
         output["idx"] = pred_i
         output["pose"] = pred_pose
         output["descriptor"] = descriptor[0]
-        return output
+        return output, query_labels if ocr_predictions else output
