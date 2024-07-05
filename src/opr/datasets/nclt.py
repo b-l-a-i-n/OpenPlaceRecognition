@@ -59,6 +59,7 @@ class NCLTDataset(BasePlaceRecognitionDataset):
         pointclouds_dirname: str = "velodyne_data",
         pointcloud_quantization_size: Optional[Union[float, Tuple[float, float, float]]] = 0.5,
         max_point_distance: Optional[float] = None,
+        use_itlp_format: bool = False,
         spherical_coords: bool = False,
         use_intensity_values: bool = False,
         image_transform: Optional[Any] = None,
@@ -145,12 +146,15 @@ class NCLTDataset(BasePlaceRecognitionDataset):
         self._max_point_distance = max_point_distance
         self._spherical_coords = spherical_coords
         self._use_intensity_values = use_intensity_values
+        self._use_itlp_format = use_itlp_format
 
     # TODO: apply DRY principle -> this is almost the same as in Oxford dataset
     def __getitem__(self, idx: int) -> Dict[str, Tensor]:  # noqa: D105
         row = self.dataset_df.iloc[idx]
         data = {"idx": torch.tensor(idx, dtype=int)}
         data["utm"] = torch.tensor(row[["northing", "easting"]].to_numpy(dtype=np.float64))
+        if self._use_itlp_format:
+             data["pose"] = torch.tensor(row[['tx', 'ty', 'tz', 'qx', 'qy', 'qz', 'qw']].to_numpy(dtype=np.float64))
         track_dir = self.dataset_root / str(row["track"])
 
         for data_source in self.data_to_load:
@@ -200,6 +204,8 @@ class NCLTDataset(BasePlaceRecognitionDataset):
                 continue
             elif data_key == "utm":
                 result["utms"] = torch.stack([e["utm"] for e in data_list], dim=0)
+            elif data_key == "pose":
+                result["pose"] = torch.stack([e["pose"] for e in data_list], dim=0)
             elif data_key.startswith("image_"):
                 result[f"images_{data_key[6:]}"] = torch.stack([e[data_key] for e in data_list])
             elif data_key.startswith("mask_"):

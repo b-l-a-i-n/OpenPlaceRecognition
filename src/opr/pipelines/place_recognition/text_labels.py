@@ -15,7 +15,10 @@ class TextLabelsPlaceRecognitionPipeline(PlaceRecognitionPipeline):
 
         with open(db_labels_path, "rb") as f:
             db_labels = json.load(f)
-            db_labels = json.loads(db_labels)
+            try:
+                db_labels = json.loads(db_labels)
+            except:
+                pass
 
         self.db_labels = db_labels
 
@@ -190,7 +193,10 @@ class TextLabelsPlaceRecognitionOCRPipeline(PlaceRecognitionPipeline):
 
         with open(db_labels_path, "rb") as f:
             db_labels = json.load(f)
-            db_labels = json.loads(db_labels)
+            try:
+                db_labels = json.loads(db_labels)
+            except:
+                pass
 
         self.db_labels = db_labels
         self.ocr_model = None
